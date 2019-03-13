@@ -137,7 +137,6 @@ public class OutputWriter implements AutoCloseable, Consumer<LogLine> {
                 this.completed = true;
                 throw new CompletedException();
             }
-            log.debug("count = {}", count);
         }
     }
 
