@@ -20,7 +20,9 @@ package dk.dbc.solr.performance.recorder;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Predicate;
 import org.slf4j.Logger;
@@ -56,8 +58,17 @@ public class Recorder {
         }
     }
 
-    private OutputWriter getOutputWriter() {
-        return new OutputWriter(System.out,
+    private OutputWriter getOutputWriter() throws FileNotFoundException {
+
+        OutputStream os;
+        String filename = config.getOutput();
+        if (filename != null) {
+            os = new FileOutputStream(filename, config.isAppend());
+        } else {
+            os = System.out;
+        }
+
+        return new OutputWriter(os,
                                 config.getSortBufferSize(),
                                 config.getDuration(),
                                 config.getLimit());

@@ -150,6 +150,16 @@ public class Arguments {
         }
     }
 
+    /**
+     * Test if a flag is set
+     *
+     * @param arg name of flag
+     * @return if it was set
+     */
+    public boolean isSet(String arg) {
+        return commandLine.hasOption(arg);
+    }
+
     private void usage(String error) {
         try (OutputStream os = error.isEmpty() ? System.out : System.err ;
              PrintWriter writer = new PrintWriter(os)) {

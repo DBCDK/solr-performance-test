@@ -75,11 +75,23 @@ public final class Config {
                 .desc("File to read log lines from")
                 .build());
 
+        options.addOption(Option.builder("o")
+                .longOpt("output")
+                .hasArg()
+                .argName("FILE")
+                .desc("File to put parsed queries into")
+                .build());
+
         options.addOption(Option.builder("a")
                 .longOpt("application")
                 .hasArg()
                 .argName("NAME")
                 .desc("name of application in log")
+                .build());
+
+        options.addOption(Option.builder("A")
+                .longOpt("append")
+                .desc("if output is given, append or overwrite")
                 .build());
 
         return options;
@@ -98,7 +110,9 @@ public final class Config {
     private final long limit;
     private final String kafka;
     private final String input;
+    private final String output;
     private final String application;
+    private boolean append;
 
     /**
      * Construct a configuration from (main) args
@@ -130,8 +144,16 @@ public final class Config {
         return input;
     }
 
+    public String getOutput() {
+        return output;
+    }
+
     public String getApplication() {
         return application;
+    }
+
+    public boolean isAppend() {
+        return append;
     }
 
     private Config(Arguments args, Iterator<String> positionalArguments) throws ParseException {
@@ -175,6 +197,10 @@ public final class Config {
             default:
                 throw new ParseException("-i/-k are mutually exclusive");
         }
+        this.output = args.take("o", null, t -> t);
+        this.append = args.isSet("A");
+        if (append && output == null)
+            throw new ParseException("-A,--append, does not makle sense without -o,--output");
 
         this.limit = args.take("l", String.valueOf(Long.MAX_VALUE), t -> {
                            long value = Long.parseLong(t);
@@ -196,7 +222,7 @@ public final class Config {
 
     @Override
     public String toString() {
-        return "Config{" + "sortBufferSize=" + sortBufferSize + ", duration=" + duration + ", limit=" + limit + ", kafka=" + kafka + ", input=" + input + ", application=" + application + '}';
+        return "Config{" + "sortBufferSize=" + sortBufferSize + ", duration=" + duration + ", limit=" + limit + ", kafka=" + kafka + ", input=" + input + ", output=" + output + ", application=" + application + ", append=" + append + '}';
     }
 
 }
