@@ -47,6 +47,7 @@ public class OutputWriter implements AutoCloseable, Consumer<LogLine> {
 
     private Instant origin;
     private long lastEntryTimeOffset;
+    private Long timeFirstDelta;
     private long count;
     private boolean completed;
 
@@ -61,7 +62,8 @@ public class OutputWriter implements AutoCloseable, Consumer<LogLine> {
      */
     public OutputWriter(OutputStream os, int orderBufferSize, long duration, long limit) {
         this.entries = new TreeSet<>();
-        this.lastEntryTimeOffset = -600_000L;
+        this.lastEntryTimeOffset = 0L;
+        this.timeFirstDelta = null;
         this.os = os;
         this.orderBufferSize = orderBufferSize;
         this.duration = duration;
@@ -122,18 +124,25 @@ public class OutputWriter implements AutoCloseable, Consumer<LogLine> {
     }
 
     /**
-     * Dump an entry onto
+     * Dump an entry onto an output stream
+     *
+     * Ensure order
      *
      * @param entry
      */
     private void outputFromIterator(Entry entry) {
         long entryTimeOffset = entry.getTimeOffset();
+        if (timeFirstDelta == null) {
+            lastEntryTimeOffset = timeFirstDelta = entryTimeOffset;
+            log.debug("lastEntryTimeOffset = {}", lastEntryTimeOffset);
+            log.debug("timeFirstDelta = {}", timeFirstDelta);
+        }
         if (entryTimeOffset < lastEntryTimeOffset) {
             log.warn("Buffered output is out of order, increase buffer size? (outputted={}, next={})", lastEntryTimeOffset, entryTimeOffset);
         } else {
             lastEntryTimeOffset = entryTimeOffset;
-            entry.outputTo(os);
-            if (count++ >= limit) {
+            entry.outputTo(os, timeFirstDelta);
+            if (++count >= limit) {
                 this.completed = true;
                 throw new CompletedException();
             }
@@ -165,9 +174,9 @@ public class OutputWriter implements AutoCloseable, Consumer<LogLine> {
             return timeOffset;
         }
 
-        private void outputTo(OutputStream os) {
+        private void outputTo(OutputStream os, long delta) {
             byte[] line = new StringBuilder()
-                    .append(timeOffset)
+                    .append(timeOffset - delta)
                     .append(" ")
                     .append(content)
                     .append("\n")
