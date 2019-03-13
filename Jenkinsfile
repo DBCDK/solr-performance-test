@@ -35,7 +35,7 @@ pipeline {
                 sh """
                     mvn -B clean
                     mvn -B install pmd:pmd javadoc:aggregate
-                    rm -rf ~/.m2/repositor/dk/dbc/solr-doc-store*
+                    rm -rf ~/.m2/repository/dk/dbc/solr-performance-test*
 
                 """
             }

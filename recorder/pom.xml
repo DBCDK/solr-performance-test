@@ -3,11 +3,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>dk.dbc</groupId>
-        <artifactId>solr-perf-test</artifactId>
+        <artifactId>solr-performance-test</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>solr-perf-test-recorder</artifactId>
+    <artifactId>solr-performance-test-recorder</artifactId>
     <packaging>jar</packaging>
     
     <dependencies>
