@@ -75,19 +75,30 @@ public final class Config {
                 .desc("File to read log lines from")
                 .build());
 
+        options.addOption(Option.builder("a")
+                .longOpt("application")
+                .hasArg()
+                .argName("NAME")
+                .desc("name of application in log")
+                .build());
+
         return options;
     }
 
-    private static final String FOOTER = "* -i/-k are mutually exclusive\n" +
-                                         "* The program only terminates after 1st log-line after DURATION, if log-lines are sparse it could run for a long time\n" +
-                                         "\n" +
-                                         "Copyright (C) 2019 DBC A/S (http://dbc.dk/)";
+    private static final String FOOTER =
+            String.join("\n",
+                        "* -i/-k are mutually exclusive",
+                        "* The program only terminates after 1st log-line after DURATION,",
+                        "  if log-lines are sparse it could run for a long time",
+                        "",
+                        "Copyright (C) 2019 DBC A/S (http://dbc.dk/)");
 
     private final int sortBufferSize;
     private final long duration;
     private final long limit;
     private final String kafka;
     private final String input;
+    private final String application;
 
     /**
      * Construct a configuration from (main) args
@@ -113,6 +124,14 @@ public final class Config {
 
     public String getKafka() {
         return kafka;
+    }
+
+    public String getInput() {
+        return input;
+    }
+
+    public String getApplication() {
+        return application;
     }
 
     private Config(Arguments args, Iterator<String> positionalArguments) throws ParseException {
@@ -163,6 +182,7 @@ public final class Config {
                                throw new RuntimeException("number of lines needs to be atleast 1");
                            return value;
                        });
+        this.application = args.take("a", null, t -> t);
     }
 
     private static int countNotNull(Object... objs) {

@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Master entry point
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */

@@ -64,7 +64,7 @@ public class LinesKafka extends LineSource {
     protected String nextLine() throws IOException {
         while (iterator == null || !iterator.hasNext()) {
             ConsumerRecords<Long, String> records = consumer.poll(60_000L);
-            this.iterator = records.iterator();
+            iterator = records.iterator();
         }
         return iterator.next().value();
     }

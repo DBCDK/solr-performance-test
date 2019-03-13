@@ -18,7 +18,11 @@
  */
 package dk.dbc.solr.performance.recorder;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.function.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,13 +43,16 @@ public class Recorder {
     public void run() {
         try (OutputWriter outputWriter = getOutputWriter() ;
              LineSource lineSource = getLineSource()) {
-
             lineSource.stream()
                     .map(LogLine::of)
                     .filter(LogLine::isValid)
+                    .filter(applicationFilter())
                     .forEach(outputWriter);
         } catch (CompletedException ex) {
             log.debug("Completed output");
+        } catch (IOException ex) {
+            log.error("Error processing input: {}", ex.getMessage());
+            log.debug("Error processing input: ", ex);
         }
     }
 
@@ -56,12 +63,23 @@ public class Recorder {
                                 config.getLimit());
     }
 
-    private LineSource getLineSource() {
+    private Predicate<LogLine> applicationFilter() {
+        String application = config.getApplication();
+        if (application == null)
+            return l -> true;
+        else
+            return l -> application.equals(l.getApp());
+    }
+
+    private LineSource getLineSource() throws FileNotFoundException {
         String kafka = config.getKafka();
-        if (kafka == null) {
-            return new LinesInputStream(System.in, StandardCharsets.UTF_8);
-        } else {
+        String input = config.getInput();
+        if (kafka != null) {
             return new LinesKafka(kafka);
+        } else if (input != null) {
+            return new LinesInputStream(new FileInputStream(input));
+        } else {
+            return new LinesInputStream(System.in, StandardCharsets.UTF_8);
         }
     }
 

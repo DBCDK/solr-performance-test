@@ -30,6 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Consumer of {@link LogLine}s, that counts then and puts them on a
+ * {@link OutputStream}
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
@@ -40,7 +42,7 @@ public class OutputWriter implements AutoCloseable, Consumer<LogLine> {
     private final SortedSet<Entry> entries;
     private final OutputStream os;
     private final int orderBufferSize;
-    private final long expire;
+    private final long duration;
     private final long limit;
 
     private Instant origin;
@@ -48,23 +50,33 @@ public class OutputWriter implements AutoCloseable, Consumer<LogLine> {
     private long count;
     private boolean completed;
 
-    public OutputWriter(OutputStream os, int orderBufferSize, long expire, long limit) {
+    /**
+     * Construct a stream consumer
+     *
+     * @param os              Stream to put lines onto
+     * @param orderBufferSize how many lines should be buffered to mitigate
+     *                        kafka out of order lines
+     * @param duration        how many ms to run for
+     * @param limit           how many lines to acquire
+     */
+    public OutputWriter(OutputStream os, int orderBufferSize, long duration, long limit) {
         this.entries = new TreeSet<>();
         this.lastEntryTimeOffset = -600_000L;
         this.os = os;
         this.orderBufferSize = orderBufferSize;
-        this.expire = expire;
+        this.duration = duration;
         this.limit = limit;
         this.count = 0;
         this.completed = false;
         log.debug("orderBufferSize = {}", orderBufferSize);
-        log.debug("expire = {}", expire);
+        log.debug("duration = {}", duration);
         log.debug("limit = {}", limit);
     }
 
     @Override
     public void close() {
         try {
+            // If no completed, but source was drained output cache
             if (!completed) {
                 Iterator<Entry> i = entries.iterator();
                 while (i.hasNext()) {
@@ -81,23 +93,41 @@ public class OutputWriter implements AutoCloseable, Consumer<LogLine> {
         }
     }
 
+    /**
+     * Stash a log line in the cache, when cache reaches it's limit, output
+     * oldest log line.
+     *
+     * @param logLine log line
+     */
     @Override
-    public void accept(LogLine t) {
+    public void accept(LogLine logLine) {
         if (entries.isEmpty())
-            this.origin = t.getInstant();
-        long currentOffset = t.timeOffsetMS(origin);
-        entries.add(new Entry(currentOffset, t.getQuery()));
+            this.origin = logLine.getInstant();
+        long currentOffset = logLine.timeOffsetMS(origin);
+        entries.add(new Entry(currentOffset, logLine.getQuery()));
         if (entries.size() > orderBufferSize) {
             Iterator<Entry> i = entries.iterator();
-            outputFromIterator(i.next());
+
+            Entry entry = i.next();
             i.remove();
+
+            long entryTimeOffset = entry.getTimeOffset();
+            if (entryTimeOffset >= duration) {
+                completed = true;
+                throw new CompletedException();
+            }
+
+            outputFromIterator(entry);
         }
     }
 
+    /**
+     * Dump an entry onto
+     *
+     * @param entry
+     */
     private void outputFromIterator(Entry entry) {
         long entryTimeOffset = entry.getTimeOffset();
-        if (entryTimeOffset > expire)
-            throw new CompletedException();
         if (entryTimeOffset < lastEntryTimeOffset) {
             log.warn("Buffered output is out of order, increase buffer size? (outputted={}, next={})", lastEntryTimeOffset, entryTimeOffset);
         } else {
@@ -111,6 +141,9 @@ public class OutputWriter implements AutoCloseable, Consumer<LogLine> {
         }
     }
 
+    /**
+     * Cache entry (timeOffset/content)
+     */
     private static class Entry implements Comparable<Entry> {
 
         private final long timeOffset;

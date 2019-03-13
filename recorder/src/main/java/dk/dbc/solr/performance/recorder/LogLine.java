@@ -44,7 +44,7 @@ public final class LogLine {
 
     private static final ObjectMapper O = new ObjectMapper();
 
-    private static final String PERFTEST_FLAG = "dbcPerftest=true";
+    private static final String PERFTEST_FLAG = "dbcPerfTest=true";
 
     private final boolean valid;
     private final Instant instant;
@@ -138,10 +138,33 @@ public final class LogLine {
         return "LogLine{" + "valid=" + valid + ", instant=" + instant + ", app=" + app + ", query=" + query + '}';
     }
 
+    /**
+     * Convert a timestamp to an instant
+     *
+     * @param text timestamp from log line
+     * @return timestamp for when the line was logged
+     */
     private static Instant parseTimeStamp(String text) {
         return Instant.from(DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(text));
     }
 
+    /**
+     * Extract query
+     * <p>
+     * <ul>
+     * <li>If path is not "/select", then return null
+     * <li>If params is unset or empty, then return null
+     * <li>If params is contain distrib=false, then return null (logging from a
+     * distributed query)
+     * <li>If params is contain PERFTEST_FLAG, then return null replayed query
+     * (no feedback loop)
+     * <p>
+     * </ul>
+     *
+     * @param message from log
+     * @return query string or null if not a valid query, with trackingId
+     *         removed, and perftest-flag set
+     */
     private static String queryOf(String message) {
         try {
             Map<String, String> parts = Arrays.stream(message.split("\\s+"))
