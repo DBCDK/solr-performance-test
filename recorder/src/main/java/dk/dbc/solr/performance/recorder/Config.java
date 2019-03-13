@@ -196,7 +196,7 @@ public final class Config {
 
     @Override
     public String toString() {
-        return "Config{" + "sortBufferSize=" + sortBufferSize + ", duration=" + duration + ", limit=" + limit + ", kafka=" + kafka + '}';
+        return "Config{" + "sortBufferSize=" + sortBufferSize + ", duration=" + duration + ", limit=" + limit + ", kafka=" + kafka + ", input=" + input + ", application=" + application + '}';
     }
 
 }
