@@ -29,15 +29,40 @@ pipeline {
                     } else {
                         println(" Building BRANCH_NAME == ${BRANCH_NAME}")
                     }
-
                 }
 
                 sh """
-                    mvn -B clean
-                    mvn -B install pmd:pmd javadoc:aggregate
-                    rm -rf ~/.m2/repository/dk/dbc/solr-performance-test*
-
+                    rm -rf \$WORKSPACE/.repo/dk/dbc
+                    mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo clean
+                    mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo install javadoc:aggregate -Dsurefire.useFile=false -Dmaven.test.failure.ignore
                 """
+                script {
+                    junit testResults: '**/target/surefire-reports/TEST-*.xml'
+
+                    def java = scanForIssues tool: [$class: 'Java']
+                    def javadoc = scanForIssues tool: [$class: 'JavaDoc']
+
+                    publishIssues issues:[java,javadoc], unstableTotalAll:1
+                }
+            } 
+        }
+
+        stage("analysis") {
+            steps {
+                sh """
+                    mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo pmd:pmd pmd:cpd findbugs:findbugs
+                """
+
+                script {
+                    def pmd = scanForIssues tool: [$class: 'Pmd'], pattern: '**/target/pmd.xml'
+                    publishIssues issues:[pmd], unstableTotalAll:1
+
+                    def cpd = scanForIssues tool: [$class: 'Cpd'], pattern: '**/target/cpd.xml'
+                    publishIssues issues:[cpd]
+
+                    def findbugs = scanForIssues tool: [$class: 'FindBugs'], pattern: '**/target/findbugsXml.xml'
+                    publishIssues issues:[findbugs], unstableTotalAll:1
+                }
             }
         }
 

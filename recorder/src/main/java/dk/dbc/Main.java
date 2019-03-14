@@ -33,11 +33,15 @@ public class Main {
     private static final Logger log = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
-        Config config = Config.of(args);
-        log.debug("config = {}", config);
-        log.info("start");
-        new Recorder(config).run();
-        log.info("end");
+        try {
+            Config config = Config.of(args);
+            log.debug("config = {}", config);
+            log.info("start");
+            new Recorder(config).run();
+            log.info("end");
+        } catch (ExitException e) {
+            System.exit(e.getCode());
+        }
     }
 
 }

@@ -23,6 +23,7 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.function.BiConsumer;
@@ -163,9 +164,17 @@ public class OutputWriter implements AutoCloseable, Consumer<LogLine> {
         private final long timeOffset;
         private final LogLine logLine;
 
-        public Entry(long timeOffset, LogLine logLine) {
+        private Entry(long timeOffset, LogLine logLine) {
             this.timeOffset = timeOffset;
             this.logLine = logLine;
+        }
+
+        private long getTimeOffset() {
+            return timeOffset;
+        }
+
+        private LogLine getLogLine() {
+            return logLine;
         }
 
         @Override
@@ -175,12 +184,25 @@ public class OutputWriter implements AutoCloseable, Consumer<LogLine> {
             return ret;
         }
 
-        public long getTimeOffset() {
-            return timeOffset;
+        @Override
+        public int hashCode() {
+            int hash = 5;
+            hash = 41 * hash + (int) ( this.timeOffset ^ ( this.timeOffset >>> 32 ) );
+            hash = 41 * hash + Objects.hashCode(this.logLine);
+            return hash;
         }
 
-        public LogLine getLogLine() {
-            return logLine;
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            final Entry other = (Entry) obj;
+            return this.timeOffset == other.timeOffset &&
+                   Objects.equals(this.logLine, other.logLine);
         }
 
         private void outputTo(OutputStream os, long delta) {

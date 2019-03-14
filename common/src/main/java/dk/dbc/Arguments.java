@@ -22,7 +22,9 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.function.Function;
@@ -35,6 +37,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  *
@@ -99,10 +103,10 @@ public class Arguments {
                 throw new ParseException("");
             if (commandLine.hasOption("version")) {
                 System.out.println("1.0-SNAPSHOT#${env.BUILD_NUMBER}");
-                System.exit(0);
+                throw new ExitException(0);
             }
         } catch (ParseException ex) {
-            usage(ex.getMessage());
+            throw usage(ex.getMessage());
         }
         return this;
     }
@@ -111,8 +115,7 @@ public class Arguments {
         try {
             return converter.of(this, commandLine.getArgList().iterator());
         } catch (ParseException ex) {
-            usage(ex.getMessage());
-            return null; // Doen't get to here (System.exit)
+            throw usage(ex.getMessage());
         }
     }
 
@@ -160,9 +163,10 @@ public class Arguments {
         return commandLine.hasOption(arg);
     }
 
-    private void usage(String error) {
+    private ExitException usage(String error) {
         try (OutputStream os = error.isEmpty() ? System.out : System.err ;
-             PrintWriter writer = new PrintWriter(os)) {
+                Writer osWriter = new OutputStreamWriter(os, UTF_8) ;
+             PrintWriter writer = new PrintWriter(osWriter)) {
             HelpFormatter formatter = new HelpFormatter();
             if (!error.isEmpty()) {
                 formatter.printWrapped(writer, 76, error);
@@ -183,7 +187,7 @@ public class Arguments {
             log.error("Error print usage: {}", ex.getMessage());
             log.debug("Error print usage: ", ex);
         }
-        System.exit(error.isEmpty() ? 0 : 1);
+        return new ExitException(error.isEmpty() ? 0 : 1);
     }
 
     private static void verbose() {

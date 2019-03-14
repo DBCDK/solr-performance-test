@@ -26,6 +26,7 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -136,6 +137,31 @@ public final class LogLine implements Comparable<LogLine> {
     @Override
     public int compareTo(LogLine t) {
         return query.compareTo(t.query);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 89 * hash + ( this.valid ? 1 : 0 );
+        hash = 89 * hash + Objects.hashCode(this.instant);
+        hash = 89 * hash + Objects.hashCode(this.app);
+        hash = 89 * hash + Objects.hashCode(this.query);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final LogLine other = (LogLine) obj;
+        return this.valid == other.valid &&
+               Objects.equals(this.app, other.app) &&
+               Objects.equals(this.query, other.query) &&
+               Objects.equals(this.instant, other.instant);
     }
 
     @Override
