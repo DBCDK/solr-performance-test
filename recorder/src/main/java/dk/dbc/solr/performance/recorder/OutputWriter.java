@@ -82,6 +82,7 @@ public class OutputWriter implements AutoCloseable, Consumer<LogLine> {
     public void close() {
         try {
             // If not completed, but source was drained output from cache
+            log.debug("completed = {}", completed);
             if (!completed)
                 entries.forEach(this::outputEntry);
         } catch (CompletedException ex) {
@@ -132,6 +133,7 @@ public class OutputWriter implements AutoCloseable, Consumer<LogLine> {
             duration += entryTimeOffset;
             log.debug("lastEntryTimeOffset = {}", lastEntryTimeOffset);
             log.debug("timeFirstDelta = {}", timeFirstDelta);
+            log.debug("duration + timeFirstDelta = {}", duration + timeFirstDelta);
             firstLineMetadata.accept(os, entry.getLogLine());
         }
         if (entryTimeOffset >= duration + timeFirstDelta) {
@@ -179,15 +181,14 @@ public class OutputWriter implements AutoCloseable, Consumer<LogLine> {
         }
 
         private void outputTo(OutputStream os, long delta) {
-            byte[] line = new StringBuilder()
+            String line = new StringBuilder()
                     .append(timeOffset - delta)
                     .append(" ")
                     .append(logLine.getQuery())
                     .append("\n")
-                    .toString()
-                    .getBytes(StandardCharsets.UTF_8);
+                    .toString();
             try {
-                os.write(line);
+                os.write(line.getBytes(StandardCharsets.UTF_8));
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }

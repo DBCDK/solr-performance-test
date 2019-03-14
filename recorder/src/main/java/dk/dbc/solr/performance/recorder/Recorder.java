@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Predicate;
+import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,28 +44,34 @@ public class Recorder {
     }
 
     public void run() {
-        try (OutputWriter outputWriter = getOutputWriter() ;
-             LineSource lineSource = getLineSource()) {
-            lineSource.stream()
-                    .map(LogLine::of)
-                    .filter(LogLine::isValid)
-                    .filter(applicationFilter())
-                    .forEach(outputWriter);
-        } catch (CompletedException ex) {
-            log.debug("Completed output");
-        } catch (IOException ex) {
-            log.error("Error processing input: {}", ex.getMessage());
-            log.debug("Error processing input: ", ex);
+        try (OutputWriter outputWriter = getOutputWriter()) {
+            try (LineSource lineSource = getLineSource()) {
+                lineSource.stream()
+                        .map(LogLine::of)
+                        .filter(LogLine::isValid)
+                        .filter(applicationFilter())
+                        .forEach(outputWriter);
+            } catch (CompletedException ex) {
+                log.debug("Completed output");
+            } catch (IOException ex) {
+                log.error("Error processing input: {}", ex.getMessage());
+                log.debug("Error processing input: ", ex);
+            }
+
+        } catch (FileNotFoundException ex) {
+            log.error("Error opening output: {}", ex.getMessage());
+            log.debug("Error opening output: ", ex);
         }
     }
 
     private OutputWriter getOutputWriter() throws FileNotFoundException {
-
         OutputStream os;
         String filename = config.getOutput();
         if (filename != null) {
+            log.debug("Outputting to {}", filename);
             os = new FileOutputStream(filename, config.isAppend());
         } else {
+            log.debug("Outputting to stdout");
             os = System.out;
         }
 
@@ -72,7 +79,7 @@ public class Recorder {
                                 config.getSortBufferSize(),
                                 config.getDuration(),
                                 config.getLimit(),
-            (a,b) -> {});
+                                new HeaderOutput(config));
     }
 
     private Predicate<LogLine> applicationFilter() {
