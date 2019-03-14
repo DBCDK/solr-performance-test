@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
-public final class LogLine {
+public final class LogLine implements Comparable<LogLine> {
 
     private static final Logger log = LoggerFactory.getLogger(LogLine.class);
 
@@ -131,6 +131,11 @@ public final class LogLine {
      */
     public long timeOffsetMS(Instant origin) {
         return Duration.between(origin, instant).toMillis();
+    }
+
+    @Override
+    public int compareTo(LogLine t) {
+        return query.compareTo(t.query);
     }
 
     @Override

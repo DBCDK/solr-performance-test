@@ -20,6 +20,7 @@ package dk.dbc.solr.performance.recorder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import org.junit.Test;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -32,13 +33,12 @@ import static org.junit.Assert.*;
  */
 public class OutputWriterTest {
 
-
     @Test(timeout = 2_000L)
     public void testEof() throws Exception {
         System.out.println("testEof");
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        try (OutputWriter outputWriter = new OutputWriter(bos, 1500, Long.MAX_VALUE, Long.MAX_VALUE) ;
+        try (OutputWriter outputWriter = new OutputWriter(bos, 1500, Long.MAX_VALUE, Long.MAX_VALUE, OutputWriterTest::firstLine) ;
              InputStream is = getClass().getClassLoader().getResourceAsStream("log.data") ;
              LineSource lineSource = new LinesInputStream(is, UTF_8)) {
 
@@ -59,7 +59,7 @@ public class OutputWriterTest {
         System.out.println("testDuration");
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        try (OutputWriter outputWriter = new OutputWriter(bos, 1500, 1_500L, Long.MAX_VALUE) ;
+        try (OutputWriter outputWriter = new OutputWriter(bos, 1500, 1_500L, Long.MAX_VALUE, OutputWriterTest::firstLine) ;
              InputStream is = getClass().getClassLoader().getResourceAsStream("log.data") ;
              LineSource lineSource = new LinesInputStream(is, UTF_8)) {
 
@@ -68,9 +68,10 @@ public class OutputWriterTest {
                     .filter(LogLine::isValid)
                     .forEach(outputWriter);
         } catch (CompletedException ex) {
-            // completed duration
+            System.out.println("completed");
         }
         String content = new String(bos.toByteArray(), UTF_8);
+        System.out.println("content = " + content);
         String[] array = content.split("\n");
         System.out.println("array.length = " + array.length);
         assertThat(array.length, lessThan(50));
@@ -82,7 +83,7 @@ public class OutputWriterTest {
         System.out.println("testLines");
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        try (OutputWriter outputWriter = new OutputWriter(bos, 10, Long.MAX_VALUE, 25) ;
+        try (OutputWriter outputWriter = new OutputWriter(bos, 10, Long.MAX_VALUE, 25, OutputWriterTest::firstLine) ;
              InputStream is = getClass().getClassLoader().getResourceAsStream("log.data") ;
              LineSource lineSource = new LinesInputStream(is, UTF_8)) {
 
@@ -99,6 +100,10 @@ public class OutputWriterTest {
         System.out.println("array.length = " + array.length);
         assertThat(array.length, is(25));
         assertThat(content, startsWith("0 ")); // Ensure timing is right
+    }
+
+    private static void firstLine(OutputStream os, LogLine logLine) {
+        System.out.println("logLine = " + logLine);
     }
 
 }

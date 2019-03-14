@@ -25,6 +25,7 @@ import java.time.Instant;
 import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +43,9 @@ public class OutputWriter implements AutoCloseable, Consumer<LogLine> {
     private final SortedSet<Entry> entries;
     private final OutputStream os;
     private final int orderBufferSize;
-    private final long duration;
+    private long duration;
     private final long limit;
+    private final BiConsumer<OutputStream, LogLine> firstLineMetadata;
 
     private Instant origin;
     private long lastEntryTimeOffset;
@@ -60,7 +62,7 @@ public class OutputWriter implements AutoCloseable, Consumer<LogLine> {
      * @param duration        how many ms to run for
      * @param limit           how many lines to acquire
      */
-    public OutputWriter(OutputStream os, int orderBufferSize, long duration, long limit) {
+    public OutputWriter(OutputStream os, int orderBufferSize, long duration, long limit, BiConsumer<OutputStream, LogLine> firstLineMetadata) {
         this.entries = new TreeSet<>();
         this.lastEntryTimeOffset = 0L;
         this.timeFirstDelta = null;
@@ -68,6 +70,7 @@ public class OutputWriter implements AutoCloseable, Consumer<LogLine> {
         this.orderBufferSize = orderBufferSize;
         this.duration = duration;
         this.limit = limit;
+        this.firstLineMetadata = firstLineMetadata;
         this.count = 0;
         this.completed = false;
         log.debug("orderBufferSize = {}", orderBufferSize);
@@ -78,13 +81,11 @@ public class OutputWriter implements AutoCloseable, Consumer<LogLine> {
     @Override
     public void close() {
         try {
-            // If no completed, but source was drained output cache
-            if (!completed) {
-                Iterator<Entry> i = entries.iterator();
-                while (i.hasNext()) {
-                    outputFromIterator(i.next());
-                }
-            }
+            // If not completed, but source was drained output from cache
+            if (!completed)
+                entries.forEach(this::outputEntry);
+        } catch (CompletedException ex) {
+            log.debug("Reached limit during shutdown");
         } finally {
             try {
                 os.close();
@@ -106,38 +107,38 @@ public class OutputWriter implements AutoCloseable, Consumer<LogLine> {
         if (entries.isEmpty())
             this.origin = logLine.getInstant();
         long currentOffset = logLine.timeOffsetMS(origin);
-        entries.add(new Entry(currentOffset, logLine.getQuery()));
+        entries.add(new Entry(currentOffset, logLine));
         if (entries.size() > orderBufferSize) {
             Iterator<Entry> i = entries.iterator();
 
             Entry entry = i.next();
             i.remove();
 
-            long entryTimeOffset = entry.getTimeOffset();
-            if (entryTimeOffset >= duration) {
-                completed = true;
-                throw new CompletedException();
-            }
-
-            outputFromIterator(entry);
+            outputEntry(entry);
         }
     }
 
     /**
      * Dump an entry onto an output stream
-     *
+     * <p>
      * Ensure order
      *
      * @param entry
      */
-    private void outputFromIterator(Entry entry) {
+    private void outputEntry(Entry entry) {
         long entryTimeOffset = entry.getTimeOffset();
         if (timeFirstDelta == null) {
             lastEntryTimeOffset = timeFirstDelta = entryTimeOffset;
+            duration += entryTimeOffset;
             log.debug("lastEntryTimeOffset = {}", lastEntryTimeOffset);
             log.debug("timeFirstDelta = {}", timeFirstDelta);
+            firstLineMetadata.accept(os, entry.getLogLine());
         }
-        if (entryTimeOffset < lastEntryTimeOffset) {
+        if (entryTimeOffset >= duration + timeFirstDelta) {
+            completed = true;
+            throw new CompletedException();
+        }
+        if (entryTimeOffset - timeFirstDelta < lastEntryTimeOffset) {
             log.warn("Buffered output is out of order, increase buffer size? (outputted={}, next={})", lastEntryTimeOffset, entryTimeOffset);
         } else {
             lastEntryTimeOffset = entryTimeOffset;
@@ -155,18 +156,17 @@ public class OutputWriter implements AutoCloseable, Consumer<LogLine> {
     private static class Entry implements Comparable<Entry> {
 
         private final long timeOffset;
-        private final String content;
+        private final LogLine logLine;
 
-        public Entry(long timeOffset, String content) {
+        public Entry(long timeOffset, LogLine logLine) {
             this.timeOffset = timeOffset;
-            this.content = content;
+            this.logLine = logLine;
         }
 
         @Override
         public int compareTo(Entry t) {
             int ret = Long.compare(timeOffset, t.timeOffset);
-            if (ret == 0)
-                ret = content.compareTo(t.content);
+            ret = ret != 0 ? ret : logLine.compareTo(t.logLine);
             return ret;
         }
 
@@ -174,11 +174,15 @@ public class OutputWriter implements AutoCloseable, Consumer<LogLine> {
             return timeOffset;
         }
 
+        public LogLine getLogLine() {
+            return logLine;
+        }
+
         private void outputTo(OutputStream os, long delta) {
             byte[] line = new StringBuilder()
                     .append(timeOffset - delta)
                     .append(" ")
-                    .append(content)
+                    .append(logLine.getQuery())
                     .append("\n")
                     .toString()
                     .getBytes(StandardCharsets.UTF_8);

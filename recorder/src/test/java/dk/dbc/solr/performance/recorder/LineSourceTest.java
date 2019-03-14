@@ -18,7 +18,6 @@
  */
 package dk.dbc.solr.performance.recorder;
 
-import dk.dbc.solr.performance.recorder.LinesInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;

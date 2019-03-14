@@ -71,7 +71,8 @@ public class Recorder {
         return new OutputWriter(os,
                                 config.getSortBufferSize(),
                                 config.getDuration(),
-                                config.getLimit());
+                                config.getLimit(),
+            (a,b) -> {});
     }
 
     private Predicate<LogLine> applicationFilter() {
