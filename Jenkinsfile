@@ -24,7 +24,7 @@ pipeline {
                 // Fail Early..
                 script {
                     if (! env.BRANCH_NAME) {
-                        currentBuild.rawBuild.result = Result.ABORTED
+                        currentBuild.result = Result.ABORTED
                         throw new hudson.AbortException('Job Started from non MultiBranch Build')
                     } else {
                         println(" Building BRANCH_NAME == ${BRANCH_NAME}")
