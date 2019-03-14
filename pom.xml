@@ -69,16 +69,21 @@
                             </execution>
                         </executions>
                     </plugin>
-
+                    
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
-                        <configuration>
-                            <compileSourceRoots>
-                                <compileSourceRoot>${basedir}/src/main/java</compileSourceRoot>
-                                <compileSourceRoot>${project.build.directory}/generated-sources/shared-exec</compileSourceRoot>
-                            </compileSourceRoots>
-                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>default-compile</id>
+                                <configuration>
+                                    <compileSourceRoots>
+                                        <compileSourceRoot>${basedir}/src/main/java</compileSourceRoot>
+                                        <compileSourceRoot>${project.build.directory}/generated-sources/shared-exec</compileSourceRoot>
+                                    </compileSourceRoots>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>                    
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
