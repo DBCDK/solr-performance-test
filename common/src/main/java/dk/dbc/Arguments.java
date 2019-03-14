@@ -124,7 +124,7 @@ public class Arguments {
      * @param defaultValue In variable is unset, use this (if null, that is
      *                     returned)
      * @param converter    function to convert to wanted type (for string use: s
-     *                     -> s)
+     *                     -&gt; s)
      * @return converted value
      * @throws ParseException If a conversion fails
      */

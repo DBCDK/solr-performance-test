@@ -56,11 +56,13 @@ public class OutputWriter implements AutoCloseable, Consumer<LogLine> {
     /**
      * Construct a stream consumer
      *
-     * @param os              Stream to put lines onto
-     * @param orderBufferSize how many lines should be buffered to mitigate
-     *                        kafka out of order lines
-     * @param duration        how many ms to run for
-     * @param limit           how many lines to acquire
+     * @param os                Stream to put lines onto
+     * @param orderBufferSize   how many lines should be buffered to mitigate
+     *                          kafka out of order lines
+     * @param duration          how many ms to run for
+     * @param limit             how many lines to acquire
+     * @param firstLineMetadata method that takes an output stream, and the
+     *                          first log line. To create headers in the output.
      */
     public OutputWriter(OutputStream os, int orderBufferSize, long duration, long limit, BiConsumer<OutputStream, LogLine> firstLineMetadata) {
         this.entries = new TreeSet<>();

@@ -124,9 +124,9 @@ public final class LogLine implements Comparable<LogLine> {
     }
 
     /**
-     * get age of log line relative to a timestamp
+     * Get age of log line relative to a timestamp
      *
-     * @param origin
+     * @param origin when to compare to
      * @return milliseconds
      */
     public long timeOffsetMS(Instant origin) {
