@@ -18,6 +18,7 @@
  */
 package dk.dbc.solr.performance.recorder;
 
+import dk.dbc.solr.performance.LineSource;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;

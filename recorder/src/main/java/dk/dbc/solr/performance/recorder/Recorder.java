@@ -18,6 +18,8 @@
  */
 package dk.dbc.solr.performance.recorder;
 
+import dk.dbc.solr.performance.LineSource;
+import dk.dbc.solr.performance.LinesInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;

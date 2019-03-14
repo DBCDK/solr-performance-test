@@ -98,7 +98,7 @@ public class Arguments {
             if (commandLine.hasOption('h'))
                 throw new ParseException("");
             if (commandLine.hasOption("version")) {
-                System.out.println("${project.version}#${env.BUILD_NUMBER}");
+                System.out.println("1.0-SNAPSHOT#${env.BUILD_NUMBER}");
                 System.exit(0);
             }
         } catch (ParseException ex) {
@@ -194,13 +194,13 @@ public class Arguments {
     private static String executable() {
         try {
             return "java -jar " +
-                   new java.io.File(Main.class.getProtectionDomain()
+                   new java.io.File(Arguments.class.getProtectionDomain()
                            .getCodeSource()
                            .getLocation()
                            .toURI()
                            .getPath())
                            .getName() +
-                   " (${project.version})";
+                   " (1.0-SNAPSHOT)";
         } catch (RuntimeException | URISyntaxException ex) {
             return "executable";
         }

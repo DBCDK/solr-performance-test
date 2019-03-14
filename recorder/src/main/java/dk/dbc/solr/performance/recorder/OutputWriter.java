@@ -70,6 +70,7 @@ public class OutputWriter implements AutoCloseable, Consumer<LogLine> {
         this.orderBufferSize = orderBufferSize;
         this.duration = duration;
         this.limit = limit;
+        this.origin = null;
         this.firstLineMetadata = firstLineMetadata;
         this.count = 0;
         this.completed = false;
@@ -105,8 +106,8 @@ public class OutputWriter implements AutoCloseable, Consumer<LogLine> {
      */
     @Override
     public void accept(LogLine logLine) {
-        if (entries.isEmpty())
-            this.origin = logLine.getInstant();
+        if (origin == null)
+            origin = logLine.getInstant();
         long currentOffset = logLine.timeOffsetMS(origin);
         entries.add(new Entry(currentOffset, logLine));
         if (entries.size() > orderBufferSize) {
