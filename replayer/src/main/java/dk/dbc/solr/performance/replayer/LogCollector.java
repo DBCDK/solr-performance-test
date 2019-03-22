@@ -26,6 +26,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -61,7 +62,7 @@ public class LogCollector {
         if(os == null)
             return;
 
-        BufferedWriter w = new BufferedWriter(new OutputStreamWriter(os));
+        BufferedWriter w = new BufferedWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8));
         Map output = new HashMap();
         output.put("configuration", conf);
         output.put("loglines", log);

@@ -144,45 +144,13 @@ public final class Config {
     private Config(Arguments args, Iterator<String> positionalArguments) throws ParseException {
         if (positionalArguments.hasNext())
             throw new ParseException("Unexpected positional argument(s) at: " + positionalArguments.next());
+        
         this.duration = args.take("d", "1h", t -> {
-                              String[] parts = t.split("(?=[^0-9])", 2);
-                              if (parts.length != 2)
-                                  throw new RuntimeException();
-                              long number = Long.parseUnsignedLong(parts[0]);
-                              if (number < 1)
-                                  throw new RuntimeException();
-                              switch (parts[1].toLowerCase(Locale.ROOT)) {
-                                  case "s":
-                                      return Duration.ofSeconds(number).toMillis();
-                                  case "m":
-                                      return Duration.ofMinutes(number).toMillis();
-                                  case "h":
-                                      return Duration.ofHours(number).toMillis();
-                                  case "d":
-                                      return Duration.ofDays(number).toMillis();
-                                  default:
-                                      throw new RuntimeException();
-                              }
-                          });
+            return parseTimeSpec(t);
+        });
+
         this.cutoff = args.take("c", "5m", t -> {
-            String[] parts = t.split("(?=[^0-9])", 2);
-            if (parts.length != 2)
-                throw new RuntimeException();
-            long number = Long.parseUnsignedLong(parts[0]);
-            if (number < 1)
-                throw new RuntimeException();
-            switch (parts[1].toLowerCase(Locale.ROOT)) {
-                case "s":
-                    return Duration.ofSeconds(number).toMillis();
-                case "m":
-                    return Duration.ofMinutes(number).toMillis();
-                case "h":
-                    return Duration.ofHours(number).toMillis();
-                case "d":
-                    return Duration.ofDays(number).toMillis();
-                default:
-                    throw new RuntimeException();
-            }
+            return parseTimeSpec(t);
         });
 
         this.solr = args.take("s", null, t -> t);
@@ -207,6 +175,32 @@ public final class Config {
         });
 
         log.debug(this.toString());
+    }
+
+    /**
+     * @param t Timespec. Can be any positive number followed by either
+     *          s, m, h or d for resp. Seconds, Minutes, Hours or days
+     * @return
+     */
+    private Long parseTimeSpec(String t) {
+        String[] parts = t.split("(?=[^0-9])", 2);
+        if (parts.length != 2)
+            throw new RuntimeException();
+        long number = Long.parseUnsignedLong(parts[0]);
+        if (number < 1)
+            throw new RuntimeException();
+        switch (parts[1].toLowerCase(Locale.ROOT)) {
+            case "s":
+                return Duration.ofSeconds(number).toMillis();
+            case "m":
+                return Duration.ofMinutes(number).toMillis();
+            case "h":
+                return Duration.ofHours(number).toMillis();
+            case "d":
+                return Duration.ofDays(number).toMillis();
+            default:
+                throw new RuntimeException();
+        }
     }
 
     @Override

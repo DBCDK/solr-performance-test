@@ -112,10 +112,10 @@ public class SolrSender implements Consumer<LogLine> {
     }
 
     /**
-     * Get age in ms
+     * Calculate difference (age) between two timestamps in ms
      *
-     * @param begin
-     * @param end
+     * @param begin Start TS as an Instant
+     * @param end End TS as an Instant
      * @return milliseconds
      */
     public long timeOffsetMS(Instant begin, Instant end) {
