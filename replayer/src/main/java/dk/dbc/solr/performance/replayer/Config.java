@@ -86,7 +86,7 @@ public final class Config {
                 .longOpt("replay")
                 .hasArg()
                 .argName("REPLAY")
-                .desc("Replayspeed (ex. 110 is 110% slower than original speed, 0 means no delay between calls")
+                .desc("Replayspeed (ex. 110 is 10% slower than original speed, 0 means no delay between calls")
                 .build());
         return options;
     }
@@ -144,7 +144,7 @@ public final class Config {
     private Config(Arguments args, Iterator<String> positionalArguments) throws ParseException {
         if (positionalArguments.hasNext())
             throw new ParseException("Unexpected positional argument(s) at: " + positionalArguments.next());
-        
+
         this.duration = args.take("d", "1h", t -> {
             return parseTimeSpec(t);
         });
