@@ -52,7 +52,7 @@ public class Replayer implements JobListener{
 
     /** Run the test, and record the result
      *
-     * @return 0 for complete run, >0 if the test was stopped prematurely
+     * @return 0 for complete run, greater than 0 if the test was stopped prematurely
      */
     public int run() {
         LogCollector logCollector = new LogCollector();
