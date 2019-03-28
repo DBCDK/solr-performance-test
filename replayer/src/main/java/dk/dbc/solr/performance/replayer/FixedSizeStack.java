@@ -26,7 +26,7 @@ import java.util.Deque;
 /**
  * Implements a stack with at fixed number of elements
  *
- * @param <T>
+ * @param <T> Type of values stored in the stack
  */
 public class FixedSizeStack<T> {
     private int maxSize;

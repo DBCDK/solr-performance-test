@@ -66,7 +66,7 @@ public class LogCollector {
     /**
      * Add a log entry to the log
      *
-     * @param entry
+     * @param entry Logentry to be stored
      */
     public void addEntry(LogEntry entry) {
         log.add(entry);
@@ -76,7 +76,7 @@ public class LogCollector {
      * Dump the log (as json) to the give OutputStream
      *
      * @param os Stream to otput to
-     * @throws IOException
+     * @throws IOException if anything goes wrong during writing
      */
     public void dump(OutputStream os) throws IOException {
         if(os == null)
