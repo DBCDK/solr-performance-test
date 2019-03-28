@@ -195,7 +195,7 @@ public class Replayer implements JobListener{
     }
 
     private static class Status {
-        public static enum Code {
+        public enum Code {
             OK,
             RUNTIME_EXCEEDED,
             CALLTIME_EXCEEDED,

@@ -35,7 +35,7 @@ public class Main {
     public static void main(String[] args) {
         Config config = Config.of(args);
         log.info("start");
-        int exitcode = (new Replayer(config).run());
+        int exitcode = new Replayer(config).run();
         log.info("end");
 
         System.exit(exitcode);

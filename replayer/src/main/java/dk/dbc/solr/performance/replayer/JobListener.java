@@ -21,5 +21,5 @@ package dk.dbc.solr.performance.replayer;
  */
 
 public interface JobListener {
-    public void callTimeExceeded();
+    void callTimeExceeded();
 }
