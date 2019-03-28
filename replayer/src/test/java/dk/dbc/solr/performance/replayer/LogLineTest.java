@@ -23,11 +23,12 @@ import dk.dbc.solr.performance.LinesInputStream;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 
 /**
@@ -57,7 +58,6 @@ public class LogLineTest {
     @Test(timeout = 2_000L)
     public void testIsValid() throws Exception {
         System.out.println("testMultiline");
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
         InputStream is = new ByteArrayInputStream(MULTI_LINE.getBytes());
         LineSource lineSource = new LinesInputStream(is, UTF_8);
 
@@ -70,7 +70,6 @@ public class LogLineTest {
     @Test(timeout = 2_000L)
     public void testHasQuery() throws Exception {
         System.out.println("testHasQuery");
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
         InputStream is = new ByteArrayInputStream(MULTI_LINE.getBytes());
         LineSource lineSource = new LinesInputStream(is, UTF_8);
 

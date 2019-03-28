@@ -50,7 +50,7 @@ public class FixedSizeStackTest {
     }
 
     @Test
-    public void testStackContentAndSize() {
+    public void testStackContentAndSize() {//NOPMD
         // add 4 more element
         stack.push(10);
         stack.push(11);

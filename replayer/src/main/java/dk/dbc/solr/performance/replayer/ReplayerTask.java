@@ -34,17 +34,13 @@ public class ReplayerTask implements Runnable{
     private SolrClient solrClient;
     private SolrSender sender;
     private LogLine logLine;
-    private Config config;
-    private LogCollector logCollector;
     private CallTimeWathcer watcher;
     private JobListener jobListener;
 
     public ReplayerTask(Config config, LogCollector logCollector, CallTimeWathcer watcher, LogLine logLine, JobListener jobListener) {
-        this.config = config;
-        this.logCollector = logCollector;
         this.watcher = watcher;
         this.solrClient = SolrClientFactory.makeSolrClient(config.getSolr());
-        this.sender = new SolrSender(config, solrClient, logCollector);
+        this.sender = new SolrSender(solrClient, logCollector);
         this.logLine = logLine;
         this.jobListener = jobListener;
     }

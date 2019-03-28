@@ -34,7 +34,7 @@ public class CallTimeWathcerTest {
 
     }
 
-    @Test
+    @Test(expected = Test.None.class /* no exception expected */)
     public void testInsertOk() {
         int numCalls = 10;
         int maxCallsExceeded = 4;
@@ -68,7 +68,7 @@ public class CallTimeWathcerTest {
         }
     }
 
-    @Test
+    @Test(expected = Test.None.class /* no exception expected */)
     public void testContainSomeErrors() {
         int numCalls = 10;
         int maxCallsExceeded = 4;

@@ -35,22 +35,15 @@ import org.slf4j.LoggerFactory;
 public class SolrSender {
     private static final Logger log = LoggerFactory.getLogger(SolrSender.class);
 
-    private long duration;
-    private long replayTime;
-    private long cutoff;
     private SolrClient solrClient;
     private LogCollector logCollector;
 
 
     /**
-     * @param config Replayer configuration
      * @param solrClient The solr client instance
      * @param collector A Log-collector
      */
-    public SolrSender(Config config, SolrClient solrClient, LogCollector collector) {
-        this.duration = config.getDurationConstraint();
-        this.cutoff = config.getCallTimeConstraint();
-        this.replayTime = config.getReplayTime();
+    public SolrSender(SolrClient solrClient, LogCollector collector) {
         this.solrClient = solrClient;
         this.logCollector = collector;
     }
