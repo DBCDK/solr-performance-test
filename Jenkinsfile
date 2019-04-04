@@ -65,17 +65,11 @@ pipeline {
                 }
             }
         }
+    }
 
-        stage("upload") {
-            steps {
-                script {
-                    if (env.BRANCH_NAME ==~ /master|trunk/) {
-                        sh """
-                            mvn -Dmaven.repo.local=\$WORKSPACE/.repo jar:jar deploy:deploy
-                        """
-                    }
-                }
-            }
+    post {
+        always {
+            archiveArtifacts artifacts: '*/target/*.jar', fingerprint: true
         }
     }
 }
