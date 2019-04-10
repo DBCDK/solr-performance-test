@@ -39,7 +39,6 @@ public class ReplayerTask implements Runnable{
 
     public ReplayerTask(Config config, LogCollector logCollector, CallTimeWathcer watcher, LogLine logLine, JobListener jobListener) {
         this.watcher = watcher;
-        HttpURLConnection solrClient;
 
         this.sender = new SolrSender(config.getSolr(), logCollector);
         this.logLine = logLine;
