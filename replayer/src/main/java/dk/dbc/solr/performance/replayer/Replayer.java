@@ -125,6 +125,7 @@ public class Replayer implements JobListener{
 
         try {
             executorService.shutdown();
+            logCollector.addRunStatus(runStatus.getCode(), runStatus.getMessage());
             logCollector.dump(getDestination(config.getOutput()));
         } catch (IOException e) {
             e.printStackTrace();

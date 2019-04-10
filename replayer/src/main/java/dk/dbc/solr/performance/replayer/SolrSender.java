@@ -71,6 +71,8 @@ public class SolrSender {
             solrClient.connect();
             int responseCode = solrClient.getResponseCode();
 
+            logCollector.incrementFor(Integer.toString(responseCode));
+
             if (responseCode != 200) {
                 log.error( "Got non-zero status({}) from solr on query: {}", responseCode, q);
                 logEntry.setStatus("Non-zero exit status from solr(" + responseCode + ")");
