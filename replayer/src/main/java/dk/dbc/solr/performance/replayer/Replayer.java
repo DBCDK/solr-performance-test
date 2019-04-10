@@ -142,7 +142,8 @@ public class Replayer implements JobListener{
      * replay speed
      */
     private long calculateDelay(long runtime, long originalTimeDelta) {
-        return (long) ((originalTimeDelta-runtime) / 100.00 * config.getReplay());
+        long d = (long) ((originalTimeDelta-runtime) / 100.00 * config.getReplay());
+        return (d>0) ? d : 0;
     }
 
     private BufferedReader getBufferedReader(String input) throws FileNotFoundException {

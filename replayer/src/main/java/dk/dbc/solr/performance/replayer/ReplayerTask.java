@@ -20,9 +20,10 @@ package dk.dbc.solr.performance.replayer;
  * File created: 25/03/2019
  */
 
-import org.apache.solr.client.solrj.SolrClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.HttpURLConnection;
 
 /**
  * An asynchronous task designed to call a solr instance,
@@ -31,7 +32,6 @@ import org.slf4j.LoggerFactory;
 public class ReplayerTask implements Runnable{
     private static final Logger log = LoggerFactory.getLogger(ReplayerTask.class);
 
-    private SolrClient solrClient;
     private SolrSender sender;
     private LogLine logLine;
     private CallTimeWathcer watcher;
@@ -39,8 +39,9 @@ public class ReplayerTask implements Runnable{
 
     public ReplayerTask(Config config, LogCollector logCollector, CallTimeWathcer watcher, LogLine logLine, JobListener jobListener) {
         this.watcher = watcher;
-        this.solrClient = SolrClientFactory.makeSolrClient(config.getSolr());
-        this.sender = new SolrSender(solrClient, logCollector);
+        HttpURLConnection solrClient;
+
+        this.sender = new SolrSender(config.getSolr(), logCollector);
         this.logLine = logLine;
         this.jobListener = jobListener;
     }
