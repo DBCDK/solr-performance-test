@@ -31,6 +31,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Collecor of status for program progression
@@ -40,10 +43,16 @@ import java.util.Map;
 public class LogCollector {
     private List<LogEntry> log;
     private Map conf;
+    private final ConcurrentMap<String, AtomicLong> counterMap ;
+    private int statusCode;
+    private String statusMessage;
+
+
 
     public LogCollector() {
         log =  new ArrayList<LogEntry>(100);
         conf = new HashMap();
+        counterMap = new ConcurrentHashMap<>();
     }
 
     /**
@@ -64,12 +73,32 @@ public class LogCollector {
     }
 
     /**
+     * Add the complete program run status
+     * @param code The exitcode for the program
+     * @param message A desciption of the exit-code
+     */
+    public void addRunStatus(int code, String message) {
+        this.statusCode = code;
+        this.statusMessage = message;
+    }
+
+    /**
      * Add a log entry to the log
      *
      * @param entry Logentry to be stored
      */
     public void addEntry(LogEntry entry) {
         log.add(entry);
+    }
+
+
+    /**
+     * Increment the counter for httpResponse codes
+     *
+     * @param httpResponse The numrical (as string) http responsecode
+     */
+    public void incrementFor(String httpResponse) {
+        counterMap.computeIfAbsent(httpResponse, p -> new AtomicLong()).incrementAndGet();
     }
 
     /**
@@ -82,10 +111,16 @@ public class LogCollector {
         if(os == null)
             return;
 
+        Map status = new HashMap();
+        status.put( "code", this.statusCode);
+        status.put("message", this.statusMessage);
+
         BufferedWriter w = new BufferedWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8));
         Map output = new HashMap();
         output.put("configuration", conf);
         output.put("loglines", log);
+        output.put("statistics", counterMap);
+        output.put("status", status);
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.writeValue(w, output);
@@ -95,7 +130,6 @@ public class LogCollector {
     public static LogEntry newEntry() {
         return new LogEntry();
     }
-
 
     public static class LogEntry {
         private long originalTimeDelta;

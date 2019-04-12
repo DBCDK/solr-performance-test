@@ -21,11 +21,11 @@
  */
 package dk.dbc.solr.performance.replayer;
 
-import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.response.QueryResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 
 /**
@@ -35,16 +35,16 @@ import org.slf4j.LoggerFactory;
 public class SolrSender {
     private static final Logger log = LoggerFactory.getLogger(SolrSender.class);
 
-    private SolrClient solrClient;
+    private String baseUrl;
     private LogCollector logCollector;
 
 
     /**
-     * @param solrClient The solr client instance
+     * @param baseUrl Base Solr url
      * @param collector A Log-collector
      */
-    public SolrSender(SolrClient solrClient, LogCollector collector) {
-        this.solrClient = solrClient;
+    public SolrSender(String baseUrl, LogCollector collector) {
+        this.baseUrl = baseUrl;
         this.logCollector = collector;
     }
 
@@ -63,12 +63,19 @@ public class SolrSender {
         logEntry.setQuery(q);
 
         try {
-            Timer.start();
-            QueryResponse resp = solrClient.query(new SolrQuery(q));
+            URL url = new URL(baseUrl + "/select?" + q );
+            HttpURLConnection solrClient= (HttpURLConnection) url.openConnection();
+            solrClient.setRequestMethod("GET");
 
-            if (resp.getStatus() != 0) {
-                log.error( "Got non-zero status({}) from solr on query: {}", resp.getStatus(), q);
-                logEntry.setStatus("Non-zero exit status from solr(" + resp.getStatus() + ")");
+            Timer.start();
+            solrClient.connect();
+            int responseCode = solrClient.getResponseCode();
+
+            logCollector.incrementFor(Integer.toString(responseCode));
+
+            if (responseCode != 200) {
+                log.error( "Got non-zero status({}) from solr on query: {}", responseCode, q);
+                logEntry.setStatus("Non-zero exit status from solr(" + responseCode + ")");
             }
         } catch (Exception e) {
             log.error("Exception from solrClient caught ({}) on query: {}", e.getMessage() , q);
