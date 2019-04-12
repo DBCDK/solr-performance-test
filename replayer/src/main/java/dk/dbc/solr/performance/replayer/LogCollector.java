@@ -112,7 +112,7 @@ public class LogCollector {
             return;
 
         Map status = new HashMap();
-        status.put( "code", new Integer(this.statusCode));
+        status.put( "code", this.statusCode);
         status.put("message", this.statusMessage);
 
         BufferedWriter w = new BufferedWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8));

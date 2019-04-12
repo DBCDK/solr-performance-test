@@ -23,8 +23,6 @@ package dk.dbc.solr.performance.replayer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.HttpURLConnection;
-
 /**
  * An asynchronous task designed to call a solr instance,
  * log and monitor the duration of the calls
