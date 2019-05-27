@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dbc.solr.performance.recorder;
+package dk.dbc.service.performance.recorder;
 
 import org.junit.Test;
 

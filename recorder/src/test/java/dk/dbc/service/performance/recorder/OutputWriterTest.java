@@ -16,13 +16,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dbc.solr.performance.recorder;
+package dk.dbc.service.performance.recorder;
 
 import dk.dbc.service.performance.LineSource;
 import dk.dbc.service.performance.LinesInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+
 import org.junit.Test;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -40,8 +41,8 @@ public class OutputWriterTest {
         System.out.println("testEof");
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        try (OutputWriter outputWriter = new OutputWriter(bos, 1500, Long.MAX_VALUE, Long.MAX_VALUE, OutputWriterTest::firstLine) ;
-             InputStream is = getClass().getClassLoader().getResourceAsStream("log.data") ;
+        try (OutputWriter outputWriter = new OutputWriter(bos, 1500, Long.MAX_VALUE, Long.MAX_VALUE, OutputWriterTest::firstLine);
+             InputStream is = getClass().getClassLoader().getResourceAsStream("log.data");
              LineSource lineSource = new LinesInputStream(is, UTF_8)) {
 
             lineSource.stream()

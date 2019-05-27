@@ -18,8 +18,8 @@
  */
 package dk.dbc;
 
-import dk.dbc.solr.performance.recorder.Config;
-import dk.dbc.solr.performance.recorder.Recorder;
+import dk.dbc.service.performance.recorder.Config;
+import dk.dbc.service.performance.recorder.Recorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -16,17 +16,18 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dbc.solr.performance.recorder;
+package dk.dbc.service.performance.recorder;
 
 import dk.dbc.Arguments;
-import java.time.Duration;
-import java.util.Iterator;
-import java.util.Locale;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.time.Duration;
+import java.util.Iterator;
+import java.util.Locale;
 
 /**
  * Parameters as supplied on the command line
