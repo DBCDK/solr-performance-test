@@ -18,8 +18,8 @@
  */
 package dk.dbc.service.performance.replayer;
 
-import dk.dbc.solr.performance.LineSource;
-import dk.dbc.solr.performance.LinesInputStream;
+import dk.dbc.service.performance.LineSource;
+import dk.dbc.service.performance.LinesInputStream;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
