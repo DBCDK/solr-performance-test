@@ -2,14 +2,14 @@
 /*
  * Copyright (C) 2019 DBC A/S (http://dbc.dk/)
  *
- * This is part of solr-performance-test
+ * This is part of performance-test
  *
- * solr-performance-test is free software: you can redistribute it and/or modify
+ * performance-test is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * solr-performance-test is distributed in the hope that it will be useful,
+ * performance-test is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -19,7 +19,7 @@
  *
  * File created: 14/03/2019
  */
-package dk.dbc.solr.performance.replayer;
+package dk.dbc.service.performance.replayer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,29 +29,29 @@ import java.net.URL;
 
 
 /**
- * Accept log-lines and send the contained query to a solr instance.
+ * Accept log-lines and send the contained query to a service instance.
  * Record the execution time, and record the result
  */
-public class SolrSender {
-    private static final Logger log = LoggerFactory.getLogger(SolrSender.class);
+public class ServiceSender {
+    private static final Logger log = LoggerFactory.getLogger(ServiceSender.class);
 
     private String baseUrl;
     private LogCollector logCollector;
 
 
     /**
-     * @param baseUrl Base Solr url
+     * @param baseUrl Base service url
      * @param collector A Log-collector
      */
-    public SolrSender(String baseUrl, LogCollector collector) {
+    public ServiceSender(String baseUrl, LogCollector collector) {
         this.baseUrl = baseUrl;
         this.logCollector = collector;
     }
 
     /**
-     * Send a query to solr and capture information about the request
+     * Send a query to the service and capture information about the request
      * @param logLine a Line from the recorded log
-     * @return Duration of solr-call in ms
+     * @return Duration of the service call in ms
      */
     public long send(LogLine logLine) {
         log.trace( "LogLine = " + logLine);
@@ -64,22 +64,22 @@ public class SolrSender {
 
         try {
             URL url = new URL(baseUrl + "/select?" + q );
-            HttpURLConnection solrClient= (HttpURLConnection) url.openConnection();
-            solrClient.setRequestMethod("GET");
+            HttpURLConnection client = (HttpURLConnection) url.openConnection();
+            client.setRequestMethod("GET");
 
             Timer.start();
-            solrClient.connect();
-            int responseCode = solrClient.getResponseCode();
+            client.connect();
+            int responseCode = client.getResponseCode();
 
             logCollector.incrementFor(Integer.toString(responseCode));
 
             if (responseCode != 200) {
-                log.error( "Got non-zero status({}) from solr on query: {}", responseCode, q);
-                logEntry.setStatus("Non-zero exit status from solr(" + responseCode + ")");
+                log.error( "Got non-200 status({}) from service on query: {}", responseCode, q);
+                logEntry.setStatus("Non-200 exit status from service(" + responseCode + ")");
             }
         } catch (Exception e) {
-            log.error("Exception from solrClient caught ({}) on query: {}", e.getMessage() , q);
-            logEntry.setStatus("Exception from solr (" + e.getMessage() + ")");
+            log.error("Exception from client caught ({}) on query: {}", e.getMessage() , q);
+            logEntry.setStatus("Exception from http-client (" + e.getMessage() + ")");
         }
 
         finally {

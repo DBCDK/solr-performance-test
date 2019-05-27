@@ -1,14 +1,14 @@
 /*
  * Copyright (C) 2019 DBC A/S (http://dbc.dk/)
  *
- * This is part of solr-performance-test-recorder
+ * This is part of performance-test-recorder
  *
- * solr-performance-test-recorder is free software: you can redistribute it and/or modify
+ * performance-test-recorder is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * solr-performance-test-recorder is distributed in the hope that it will be useful,
+ * performance-test-recorder is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dbc.solr.performance.replayer;
+package dk.dbc.service.performance.replayer;
 
 import dk.dbc.Arguments;
 import org.apache.commons.cli.Option;
@@ -40,7 +40,7 @@ public final class Config {
     private final long replayTime;
     private final long callTimeConstraint;
     private final long limit;
-    private final String solr;
+    private final String service;
     private final String input;
     private final String output;
     private final int replay;
@@ -54,7 +54,7 @@ public final class Config {
                 .longOpt("calltime")
                 .hasArg()
                 .argName("CUTOFF/MAX-CALLS/CALL-STACK-SIZE")
-                .desc("If more than MAX-CALLS calls to Solr out of the last CALL-STACK-SIZE takes longer than CUTOFF, the replay will stop (default: 5s/10/100)")
+                .desc("If more than MAX-CALLS calls to the service out of the last CALL-STACK-SIZE takes longer than CUTOFF, the replay will stop (default: 5s/10/100)")
                 .build());
 
         options.addOption(Option.builder("d")
@@ -79,7 +79,7 @@ public final class Config {
                 .build());
 
         options.addOption(Option.builder("s")
-                .longOpt("solr")
+                .longOpt("service")
                 .hasArg()
                 .argName("URL")
                 .desc("Connect url (host[:port])")
@@ -147,12 +147,12 @@ public final class Config {
             throw new ParseException("Calltime constraint not valid");
         }
 
-        this.solr = args.take("s", null, t -> t);
+        this.service = args.take("s", null, t -> t);
         this.input = args.take("i", null, t -> t);
         this.output= args.take("o", null, t -> t);
 
-        if(this.solr == null)
-            throw new ParseException("Solr-URL is mandatory");
+        if(this.service == null)
+            throw new ParseException("Service-URL is mandatory");
 
         this.limit = args.take("l", String.valueOf(Long.MAX_VALUE), t -> {
                            long value = Long.parseLong(t);
@@ -209,7 +209,7 @@ public final class Config {
                 put( "replayTime", String.valueOf(replayTime));
                 put( "callConstraint", String.valueOf(callTimeConstraint) + "/" + maxDelayedCalls + "/" + callBufferSize);
                 put( "limit", String.valueOf(limit));
-                put( "solr", solr);
+                put( "service", service);
                 put( "input", input);
                 put( "output", output);
                 put( "replay", String.valueOf(replay));
@@ -237,8 +237,8 @@ public final class Config {
         return replay;
     }
 
-    public String getSolr() {
-        return solr;
+    public String getService() {
+        return service;
     }
 
     public String getInput() {
