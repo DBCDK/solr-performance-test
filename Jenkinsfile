@@ -70,6 +70,7 @@ pipeline {
     post {
         always {
             archiveArtifacts artifacts: '*/target/*.jar', fingerprint: true
+            step([$class: 'JavadocArchiver', javadocDir: 'target/site/apidocs', keepAll: false])
         }
     }
 }
