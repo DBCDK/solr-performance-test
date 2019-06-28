@@ -1,3 +1,7 @@
+# Project no longer active!
+This project is no longer maintained. It has been superseded by a more generic variant service-performance-test
+Please see https://github.com/DBCDK/service-performance-test
+
 # solr-performance-test
 Tools to run a performance test of a solr cluster
 
@@ -22,5 +26,5 @@ current line was requested. The query-string is the content posted to SolR
 name: `solr-performance-test-replayer.jar`
 
 This takes a file generated from solr-performance-test-recorder.jar and replays it
-against a Solr instance. The queries sendt with the actual execution time is recorded 
+against a Solr instance. The queries sent with the actual execution time is recorded 
 as json in a file.
